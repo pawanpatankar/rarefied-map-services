@@ -1,4 +1,4 @@
-# Secure Map Viewer Platform
+# Rarefied Map Services Platform
 
 A Django-based web application for secure viewing of maps in PDF, KMZ, and KML formats. This platform provides a view-only interface that prevents downloading, copying, or saving maps while allowing users to browse through multiple departments and their hierarchical categories.
 
@@ -278,7 +278,7 @@ The application includes several security features:
 - `/departments/` - List of all departments
 - `/department/<id>/` - Department detail with categories
 - `/category/<id>/` - Category detail with maps
-- `/map/<id>/` - Secure map viewer
+- `/map/<id>/` - Rarefied Map Services
 - `/map/<id>/file/` - Protected map file serving
 - `/admin/` - Admin panel
 
