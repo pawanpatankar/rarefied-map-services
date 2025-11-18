@@ -1,0 +1,218 @@
+{% extends 'maps/base.html' %}
+
+{% block title %}Forum - Request Maps - Secure Map Viewer{% endblock %}
+
+{% block extra_css %}
+<style>
+    .forum-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .forum-header {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .forum-header h1 {
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .forum-header p {
+        color: #7f8c8d;
+        line-height: 1.6;
+    }
+
+    .forum-form {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #2c3e50;
+        font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+        font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #3498db;
+    }
+
+    .form-group textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .form-help {
+        font-size: 0.9rem;
+        color: #7f8c8d;
+        margin-top: 0.25rem;
+    }
+
+    .btn-submit {
+        background-color: #3498db;
+        color: white;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        width: 100%;
+    }
+
+    .btn-submit:hover {
+        background-color: #2980b9;
+    }
+
+    .info-boxes {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .info-box {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+
+    .info-box-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .info-box h3 {
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
+    }
+
+    .info-box p {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+        .info-boxes {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="forum-container">
+    <div class="forum-header">
+        <h1>Request Maps</h1>
+        <p>
+            Can't find the maps you're looking for? Submit your request below and our team
+            will review it. We'll contact you once the requested maps become available.
+        </p>
+    </div>
+
+    <div class="info-boxes">
+        <div class="info-box">
+            <div class="info-box-icon">📋</div>
+            <h3>Easy Submission</h3>
+            <p>Fill out the simple form to submit your map request</p>
+        </div>
+        <div class="info-box">
+            <div class="info-box-icon">🔍</div>
+            <h3>Team Review</h3>
+            <p>Our team reviews all requests and works to fulfill them</p>
+        </div>
+    </div>
+
+    <div class="forum-form">
+        <h2 style="color: #2c3e50; margin-bottom: 1.5rem;">Submit Your Request</h2>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="name">Full Name *</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address *</label>
+                <input type="email" id="email" name="email" required>
+                <div class="form-help">We'll use this to contact you about your request</div>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone">
+                <div class="form-help">Optional but helpful for quick follow-ups</div>
+            </div>
+
+            <div class="form-group">
+                <label for="department">Department</label>
+                <select id="department" name="department">
+                    <option value="">Select a department (optional)</option>
+                    {% for dept in departments %}
+                    <option value="{{ dept.id }}">{{ dept.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="map_interest">Which Map(s) Are You Interested In? *</label>
+                <input type="text" id="map_interest" name="map_interest" required
+                       placeholder="e.g., Railway network map for Eastern region">
+                <div class="form-help">Be as specific as possible about the map you need</div>
+            </div>
+
+            <div class="form-group">
+                <label for="message">Additional Details *</label>
+                <textarea id="message" name="message" required
+                          placeholder="Please provide any additional information about your map requirements, intended use, or specific areas of interest..."></textarea>
+                <div class="form-help">
+                    Include details like: purpose of use, specific regions, time period, level of detail needed, etc.
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">Submit Request</button>
+        </form>
+    </div>
+
+    <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 1.5rem; border-radius: 8px; margin-top: 2rem;">
+        <h3 style="color: #856404; margin-bottom: 0.5rem;">📌 Important Note</h3>
+        <p style="color: #856404; margin: 0;">
+            We review all submissions carefully. While we strive to fulfill all requests, availability
+            may depend on data accessibility, licensing, and security considerations. We'll keep you
+            informed throughout the process.
+        </p>
+    </div>
+</div>
+{% endblock %}

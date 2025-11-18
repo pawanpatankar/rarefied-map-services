@@ -1,0 +1,316 @@
+{% extends 'maps/base.html' %}
+
+{% block title %}{{ map.title }} - Map Viewer{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* --- OLD UI STYLE KEPT --- */
+    body {
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+    }
+
+    .viewer-container {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .map-header { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #ecf0f1; }
+
+    .map-header h1 { color: #2c3e50; margin-bottom: 0.5rem; }
+
+    .map-meta {
+        color: #7f8c8d;
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .map-meta span { display: inline-flex; align-items: center; gap: 0.5rem; }
+
+    .security-notice {
+        background: #fff3cd;
+        border: 1px solid #ffc107;
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+        color: #856404;
+    }
+
+    .back-btn {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background-color: #95a5a6;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        margin-top: 1rem;
+        transition: background-color 0.3s;
+    }
+    .back-btn:hover { background-color: #7f8c8d; }
+
+    .map-description {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 4px;
+        margin-top: 1.5rem;
+        line-height: 1.8;
+    }
+
+    /* --- NEW PDF VIEWER STYLES ONLY --- */
+    .pdf-controls {
+        background: #f0f0f0;
+        padding: 12px 20px;
+        border-bottom: 1px solid #ddd;
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .pdf-controls button {
+        padding: 8px 15px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .pdf-controls button:hover { background: #8a57b9; }
+
+    .pdf-viewer {
+        flex: 1;
+        overflow: auto;
+        background: #f0f0f0;
+        padding: 20px;
+        display: block;
+        text-align: center;
+        border: 2px solid #ecf0f1;
+        border-radius: 4px;
+        cursor: grab;
+    }
+
+    .pdf-viewer:active {
+        cursor: grabbing;
+    }
+
+    #pdf-canvas {
+        display: inline-block;
+        background: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        max-width: none !important;
+        max-height: none !important;
+        width: auto !important;
+        height: auto !important;
+    }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="viewer-container">
+
+    <!-- HEADER (OLD DESIGN) -->
+    <div class="map-header">
+        <h1>{{ map.title }}</h1>
+        <div class="map-meta">
+            <span>📁 {{ map.department.name }}</span>
+            <span>📂 {{ map.category.get_full_path }}</span>
+            <span>📄 {{ map.file_format|upper }}</span>
+            <span>👁️ {{ map.view_count }} views</span>
+        </div>
+    </div>
+
+    <!-- SECURITY NOTICE -->
+    <div class="security-notice">
+        🔒 <strong>Security Notice:</strong> This map is view-only. Download, copy, and print functions are disabled.
+    </div>
+
+    <!-- NEW PDF VIEWER -->
+    {% if map.file_format == 'pdf' %}
+        <div class="pdf-controls">
+            <button id="prev-page" onclick="previousPage()">⬅ Previous</button>
+            <span>Page <span id="page-num">1</span> / <span id="page-count">0</span></span>
+            <button id="next-page" onclick="nextPage()">Next ➡</button>
+        </div>
+        <div class="pdf-viewer">
+            <canvas id="pdf-canvas"></canvas>
+        </div>
+
+{% elif map.file_format == 'kml' or map.file_format == 'kmz' %}
+    <div id="map" style="width:100%; height:600px; border: 2px solid #ecf0f1; border-radius: 4px;"></div>
+{% endif %}
+
+
+    {% if map.description %}
+        <div class="map-description">
+            <h3>Description</h3>
+            <p>{{ map.description }}</p>
+        </div>
+    {% endif %}
+
+    <a href="{% url 'category_detail' map.category.id %}" class="back-btn">← Back to Category</a>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if map.file_format == 'pdf' %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+const pdfUrl = "{% url 'serve_map_file' map.id %}";
+let pdfDoc = null;
+let pageNum = 1;
+// --- PDF Click & Drag Panning ---
+const canvas = document.getElementById("pdf-canvas");
+const ctx = canvas.getContext("2d");
+const container = document.querySelector(".pdf-viewer");   // <-- REQUIRED FIX
+
+// --- PDF Click & Drag Panning ---
+let isDragging = false;
+let startX, startY;
+let scrollLeft, scrollTop;
+
+container.addEventListener("mousedown", (e) => {
+    isDragging = true;
+    container.style.cursor = "grabbing";
+    startX = e.pageX - container.offsetLeft;
+    startY = e.pageY - container.offsetTop;
+    scrollLeft = container.scrollLeft;
+    scrollTop = container.scrollTop;
+});
+
+container.addEventListener("mouseleave", () => {
+    isDragging = false;
+    container.style.cursor = "grab";
+});
+
+container.addEventListener("mouseup", () => {
+    isDragging = false;
+    container.style.cursor = "grab";
+});
+
+container.addEventListener("mousemove", (e) => {
+    if (!isDragging) return;
+    e.preventDefault();
+
+    const x = e.pageX - container.offsetLeft;
+    const y = e.pageY - container.offsetTop;
+
+    const walkX = x - startX;
+    const walkY = y - startY;
+
+    container.scrollLeft = scrollLeft - walkX;
+    container.scrollTop = scrollTop - walkY;
+});
+
+// Load PDF
+pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
+    pdfDoc = pdf;
+    document.getElementById("page-count").innerText = pdf.numPages;
+    renderPage(pageNum);
+});
+
+function renderPage(num) {
+    pdfDoc.getPage(num).then(page => {
+        const viewport = page.getViewport({ scale: 1.3 });
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+
+        page.render({ canvasContext: ctx, viewport });
+        document.getElementById("page-num").innerText = num;
+    });
+}
+
+function nextPage() {
+    if (pageNum >= pdfDoc.numPages) return;
+    pageNum++;
+    renderPage(pageNum);
+}
+
+function previousPage() {
+    if (pageNum <= 1) return;
+    pageNum--;
+    renderPage(pageNum);
+}
+
+// Disable right click, print, save
+document.addEventListener("contextmenu", e => e.preventDefault());
+document.addEventListener("keydown", e => {
+    if ((e.ctrlKey && ["s", "p", "u"].includes(e.key)) || e.key === "F12") {
+        e.preventDefault();
+    }
+});
+</script>
+{% endif %}
+
+{% if map.file_format == 'kml' or map.file_format == 'kmz' %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    var map = L.map('map', {
+        zoomControl: true,
+        scrollWheelZoom: false,
+        doubleClickZoom: false,
+        boxZoom: false,
+        keyboard: false
+    }).setView([20, 0], 2);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19
+    }).addTo(map);
+
+    var fileUrl = "{{ map.file.url }}";
+    var extension = "{{ map.file_format }}";
+
+    if (extension === 'kml') {
+        var kmlLayer = omnivore.kml(fileUrl).on('ready', function() {
+            map.fitBounds(kmlLayer.getBounds());
+        });
+        kmlLayer.addTo(map);
+
+    } else if (extension === 'kmz') {
+        fetch(fileUrl)
+            .then(res => res.blob())
+            .then(blob => JSZip.loadAsync(blob))
+            .then(zip => {
+                let kmlFile = Object.keys(zip.files).find(f => f.endsWith(".kml"));
+                return zip.files[kmlFile].async("string");
+            })
+            .then(kmlText => {
+                var parser = new DOMParser();
+                var kmlDom = parser.parseFromString(kmlText, "text/xml");
+                var layer = omnivore.kml.parse(kmlDom);
+
+                layer.addTo(map);
+                map.fitBounds(layer.getBounds());
+            });
+    }
+
+    // Disable download / right-click security
+    document.addEventListener("contextmenu", e => e.preventDefault());
+    document.addEventListener("keydown", e => {
+        if ((e.ctrlKey && ["s", "p", "u"].includes(e.key)) || e.key === "F12") {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endif %}
+
+
+{% endblock %}

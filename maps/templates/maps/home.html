@@ -1,0 +1,204 @@
+{% extends 'maps/base.html' %}
+
+{% block title %}Home - Secure Map Viewer{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 4rem 2rem;
+        text-align: center;
+        border-radius: 8px;
+        margin-bottom: 3rem;
+    }
+
+    .hero h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .hero p {
+        font-size: 1.2rem;
+        opacity: 0.9;
+    }
+
+    .section-title {
+        font-size: 2rem;
+        margin-bottom: 2rem;
+        color: #2c3e50;
+        text-align: center;
+    }
+
+    .departments-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-bottom: 4rem;
+    }
+
+    .department-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        text-align: center;
+        transition: transform 0.3s, box-shadow 0.3s;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .department-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .department-card h3 {
+        color: #3498db;
+        margin-bottom: 0.5rem;
+    }
+
+    .maps-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .map-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        overflow: hidden;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .map-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .map-card img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .map-card-content {
+        padding: 1.5rem;
+    }
+
+    .map-card h3 {
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .map-meta {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background-color: #3498db;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: background-color 0.3s;
+    }
+
+    .btn:hover {
+        background-color: #2980b9;
+    }
+
+    .features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin: 3rem 0;
+    }
+
+    .feature-box {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+
+    .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>Welcome to Secure Map Viewer</h1>
+    <p>Browse and view maps from various departments in a secure, protected environment</p>
+</div>
+
+<div class="features">
+    <div class="feature-box">
+        <div class="feature-icon">🔒</div>
+        <h3>Secure Viewing</h3>
+        <p>View-only access prevents unauthorized downloads</p>
+    </div>
+    <div class="feature-box">
+        <div class="feature-icon">🗂️</div>
+        <h3>Multiple Departments</h3>
+        <p>Access maps from Police, Railway, PWD, and more</p>
+    </div>
+    <div class="feature-box">
+        <div class="feature-icon">📄</div>
+        <h3>Multiple Formats</h3>
+        <p>Support for PDF, KMZ, and KML formats</p>
+    </div>
+</div>
+
+<h2 class="section-title">Browse by Department</h2>
+<div class="departments-grid">
+    {% for department in departments %}
+    <a href="{% url 'department_detail' department.id %}" class="department-card">
+        <h3>{{ department.name }}</h3>
+        <p>{{ department.description|truncatewords:15 }}</p>
+    </a>
+    {% empty %}
+    <p>No departments available at the moment.</p>
+    {% endfor %}
+</div>
+
+{% if recent_maps %}
+<h2 class="section-title">Recently Added Maps</h2>
+<div class="maps-grid">
+    {% for map in recent_maps %}
+    <div class="map-card">
+        {% if map.thumbnail %}
+        <img src="{{ map.thumbnail.url }}" alt="{{ map.title }}">
+        {% else %}
+        <img src="" alt="Map thumbnail">
+        {% endif %}
+        <div class="map-card-content">
+            <h3>{{ map.title }}</h3>
+            <div class="map-meta">
+                <p>{{ map.department.name }} - {{ map.file_format|upper }}</p>
+                <p>Views: {{ map.view_count }}</p>
+            </div>
+            <a href="{% url 'map_viewer' map.id %}" class="btn">View Map</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+    <h3>Need specific maps?</h3>
+    <p style="margin: 1rem 0;">Can't find what you're looking for? Submit a request through our forum.</p>
+    <a href="{% url 'forum' %}" class="btn">Submit Request</a>
+</div>
+{% endblock %}

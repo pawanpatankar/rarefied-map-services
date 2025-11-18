@@ -1,0 +1,310 @@
+{% extends 'maps/base.html' %}
+
+{% block title %}{{ category.name }} - Secure Map Viewer{% endblock %}
+
+{% block extra_css %}
+<style>
+    .breadcrumb {
+        background: white;
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .breadcrumb a {
+        color: #3498db;
+        text-decoration: none;
+    }
+
+    .breadcrumb a:hover {
+        text-decoration: underline;
+    }
+
+    .page-header {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        color: #2c3e50;
+        margin: 2rem 0 1rem 0;
+    }
+
+    .subcategories-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .subcategory-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        padding: 1.5rem;
+        transition: transform 0.3s, box-shadow 0.3s;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .subcategory-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .subcategory-card h3 {
+        color: #3498db;
+        margin-bottom: 0.5rem;
+    }
+
+    .maps-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+
+    .map-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        overflow: hidden;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .map-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .map-thumbnail {
+        width: 100%;
+        height: 180px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 3rem;
+    }
+
+    .map-thumbnail img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .map-content {
+        padding: 1.5rem;
+    }
+
+    .map-content h3 {
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .map-meta {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background-color: #3498db;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: background-color 0.3s;
+    }
+
+    .btn:hover {
+        background-color: #2980b9;
+    }
+
+    .empty-state {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        color: #95a5a6;
+    }
+
+    .search-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .search-form {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .search-form input {
+        flex: 1;
+        min-width: 250px;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+
+    .search-form input:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    .search-form button {
+        padding: 0.75rem 1.5rem;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        font-size: 1rem;
+    }
+
+    .search-form button:hover {
+        background-color: #2980b9;
+    }
+
+    .search-clear {
+        padding: 0.75rem 1.5rem;
+        background-color: #95a5a6;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        font-size: 1rem;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .search-clear:hover {
+        background-color: #7f8c8d;
+    }
+
+    .search-results-info {
+        color: #7f8c8d;
+        margin-top: 1rem;
+        font-size: 0.95rem;
+    }
+
+    .no-search-results {
+        background: white;
+        padding: 3rem;
+        border-radius: 8px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        color: #95a5a6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="{% url 'departments_list' %}">Departments</a> /
+    <a href="{% url 'department_detail' category.department.id %}">{{ category.department.name }}</a> /
+    {{ category.name }}
+</div>
+
+<div class="page-header">
+    <h1>{{ category.name }}</h1>
+    {% if category.description %}
+    <p>{{ category.description }}</p>
+    {% endif %}
+</div>
+
+<div class="search-section">
+    <form method="get" class="search-form">
+        <input type="text" name="q" placeholder="Search maps and categories..." value="{{ search_query }}" autofocus>
+        <button type="submit">🔍 Search</button>
+        {% if search_query %}
+        <a href="{% url 'category_detail' category.id %}" class="search-clear">Clear</a>
+        {% endif %}
+    </form>
+    {% if search_query %}
+    <div class="search-results-info">
+        Showing results for "<strong>{{ search_query }}</strong>"
+        {% if maps or subcategories %}
+            ({{ maps.count }} map{{ maps|pluralize }} and {{ subcategories.count }} categor{{ subcategories|pluralize:"y,ies" }} found)
+        {% else %}
+            (No results found)
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+{% if search_query and not maps and not subcategories %}
+<div class="no-search-results">
+    <h3>No results found</h3>
+    <p>We couldn't find any maps or categories matching "<strong>{{ search_query }}</strong>"</p>
+    <p style="margin-top: 1rem;">
+        <a href="{% url 'category_detail' category.id %}" class="search-clear" style="padding: 0.5rem 1rem;">Clear Search</a>
+    </p>
+</div>
+{% endif %}
+
+{% if subcategories and not search_query or subcategories %}
+<h2 class="section-title">Subcategories</h2>
+<div class="subcategories-grid">
+    {% for subcategory in subcategories %}
+    <a href="{% url 'category_detail' subcategory.id %}" class="subcategory-card">
+        <h3>{{ subcategory.name }}</h3>
+        {% if subcategory.description %}
+        <p>{{ subcategory.description|truncatewords:10 }}</p>
+        {% endif %}
+    </a>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if maps and not search_query or maps %}
+<h2 class="section-title">Available Maps</h2>
+<div class="maps-grid">
+    {% for map in maps %}
+    <div class="map-card">
+        <div class="map-thumbnail">
+            {% if map.thumbnail %}
+            <img src="{{ map.thumbnail.url }}" alt="{{ map.title }}">
+            {% else %}
+            📄
+            {% endif %}
+        </div>
+        <div class="map-content">
+            <h3>{{ map.title }}</h3>
+            <div class="map-meta">
+                <p>Format: {{ map.file_format|upper }}</p>
+                <p>Views: {{ map.view_count }}</p>
+            </div>
+            <a href="{% url 'map_viewer' map.id %}" class="btn">View Map</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% elif not subcategories %}
+<div class="empty-state">
+    <h3>No maps available</h3>
+    <p>This category doesn't have any maps yet.</p>
+</div>
+{% endif %}
+{% endblock %}

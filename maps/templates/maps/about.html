@@ -1,0 +1,139 @@
+{% extends 'maps/base.html' %}
+
+{% block title %}About Us - Secure Map Viewer{% endblock %}
+
+{% block extra_css %}
+<style>
+    .about-section {
+        background: white;
+        padding: 3rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .about-section h1 {
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+        font-size: 2.5rem;
+    }
+
+    .about-section h2 {
+        color: #3498db;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .about-section p {
+        line-height: 1.8;
+        color: #555;
+        margin-bottom: 1rem;
+    }
+
+    .features-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin: 2rem 0;
+    }
+
+    .feature-item {
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #3498db;
+    }
+
+    .feature-item h3 {
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .feature-item p {
+        color: #7f8c8d;
+        font-size: 0.95rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="about-section">
+    <h1>About Secure Map Viewer</h1>
+
+    <p>
+        Welcome to Secure Map Viewer, your trusted platform for accessing and viewing geographical maps
+        from various government departments and organizations. Our platform provides a secure,
+        view-only environment designed to protect sensitive geographical data while making it
+        accessible to authorized users.
+    </p>
+
+    <h2>Our Mission</h2>
+    <p>
+        We aim to provide a centralized, secure platform where users can access maps from multiple
+        departments including Police, Railway, PWD, Electricity Board, and more. Our focus is on
+        maintaining the integrity and security of geographical data while ensuring easy access for
+        legitimate purposes.
+    </p>
+
+    <h2>Key Features</h2>
+    <div class="features-list">
+        <div class="feature-item">
+            <h3>🔒 Secure Viewing</h3>
+            <p>View-only access with advanced security measures to prevent unauthorized downloads and copying.</p>
+        </div>
+        <div class="feature-item">
+            <h3>📂 Multiple Departments</h3>
+            <p>Access maps from various government departments and organizations in one place.</p>
+        </div>
+        <div class="feature-item">
+            <h3>🗂️ Dynamic Categories</h3>
+            <p>Navigate through flexible, hierarchical categories tailored to each department's structure.</p>
+        </div>
+        <div class="feature-item">
+            <h3>📄 Multiple Formats</h3>
+            <p>Support for PDF, KMZ, and KML file formats for comprehensive map viewing.</p>
+        </div>
+        <div class="feature-item">
+            <h3>💬 Request System</h3>
+            <p>Submit requests for specific maps through our forum system.</p>
+        </div>
+        <div class="feature-item">
+            <h3>🎯 User Friendly</h3>
+            <p>Clean, intuitive interface designed for easy navigation and map discovery.</p>
+        </div>
+    </div>
+
+    <h2>Security & Privacy</h2>
+    <p>
+        We take security seriously. Our platform implements multiple layers of protection including:
+    </p>
+    <ul style="line-height: 1.8; color: #555; margin-left: 2rem;">
+        <li>View-only access preventing downloads and unauthorized copying</li>
+        <li>Disabled right-click and keyboard shortcuts for saving content</li>
+        <li>Protected PDF viewing with restricted permissions</li>
+        <li>Secure file serving with appropriate headers</li>
+        <li>Regular security audits and updates</li>
+    </ul>
+
+    <h2>Who We Serve</h2>
+    <p>
+        Our platform serves government officials, urban planners, researchers, and authorized
+        personnel who need access to geographical maps for planning, analysis, and decision-making
+        purposes. Each user accesses maps within their authorized scope.
+    </p>
+
+    <h2>Need Specific Maps?</h2>
+    <p>
+        If you're looking for specific maps that aren't currently available on our platform,
+        please use our <a href="{% url 'forum' %}" style="color: #3498db;">forum submission system</a>
+        to request them. Our team reviews all requests and works to make relevant maps available.
+    </p>
+
+    <h2>Contact Information</h2>
+    <p>
+        For inquiries about map purchases, custom requests, or general questions,
+        please visit our <a href="{% url 'contact' %}" style="color: #3498db;">contact page</a>.
+        Our team is here to help you with your mapping needs.
+    </p>
+</div>
+{% endblock %}

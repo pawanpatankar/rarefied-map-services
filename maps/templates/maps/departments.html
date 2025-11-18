@@ -1,0 +1,84 @@
+{% extends 'maps/base.html' %}
+
+{% block title %}Departments - Secure Map Viewer{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .page-header h1 {
+        font-size: 2.5rem;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-header p {
+        color: #7f8c8d;
+        font-size: 1.1rem;
+    }
+
+    .departments-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+
+    .department-item {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        padding: 2rem;
+        transition: transform 0.3s, box-shadow 0.3s;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .department-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .department-item h2 {
+        color: #3498db;
+        margin-bottom: 1rem;
+    }
+
+    .department-item p {
+        color: #7f8c8d;
+        margin-bottom: 1rem;
+        line-height: 1.6;
+    }
+
+    .department-stats {
+        display: flex;
+        gap: 1rem;
+        color: #95a5a6;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Browse Departments</h1>
+    <p>Select a department to explore its map categories</p>
+</div>
+
+<div class="departments-list">
+    {% for department in departments %}
+    <a href="{% url 'department_detail' department.id %}" class="department-item">
+        <h2>{{ department.name }}</h2>
+        <p>{{ department.description|default:"Explore maps and categories in this department." }}</p>
+        <div class="department-stats">
+            <span>📂 {{ department.categories.count }} categories</span>
+        </div>
+    </a>
+    {% empty %}
+    <p>No departments available at the moment.</p>
+    {% endfor %}
+</div>
+{% endblock %}

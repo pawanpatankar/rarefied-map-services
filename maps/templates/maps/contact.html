@@ -1,0 +1,232 @@
+{% extends 'maps/base.html' %}
+
+{% block title %}Contact Us - Secure Map Viewer{% endblock %}
+
+{% block extra_css %}
+<style>
+    .contact-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .contact-form-section,
+    .contact-info-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .contact-form-section h1,
+    .contact-info-section h2 {
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #2c3e50;
+        font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+        font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #3498db;
+    }
+
+    .form-group textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .btn-submit {
+        background-color: #3498db;
+        color: white;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .btn-submit:hover {
+        background-color: #2980b9;
+    }
+
+    .contact-details {
+        margin-top: 1.5rem;
+    }
+
+    .contact-item {
+        display: flex;
+        align-items: start;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 4px;
+    }
+
+    .contact-icon {
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .contact-item-content h3 {
+        color: #2c3e50;
+        margin-bottom: 0.25rem;
+        font-size: 1.1rem;
+    }
+
+    .contact-item-content p {
+        color: #7f8c8d;
+        margin: 0;
+    }
+
+    .info-box {
+        background: #e8f4f8;
+        padding: 1.5rem;
+        border-radius: 4px;
+        border-left: 4px solid #3498db;
+        margin-top: 1.5rem;
+    }
+
+    .info-box h3 {
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .info-box p {
+        color: #555;
+        line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+        .contact-container {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="contact-container">
+    <div class="contact-form-section">
+        <h1>Get in Touch</h1>
+        <p style="color: #7f8c8d; margin-bottom: 2rem;">
+            Have questions or need assistance? Fill out the form below and we'll get back to you soon.
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="name">Full Name *</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address *</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone">
+            </div>
+
+            <div class="form-group">
+                <label for="subject">Subject *</label>
+                <input type="text" id="subject" name="subject" required>
+            </div>
+
+            <div class="form-group">
+                <label for="message">Message *</label>
+                <textarea id="message" name="message" required></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit">Send Message</button>
+        </form>
+    </div>
+
+    <div class="contact-info-section">
+        <h2>Contact Information</h2>
+        <p style="color: #7f8c8d; margin-bottom: 1.5rem;">
+            Reach out to us through any of the following channels.
+        </p>
+
+        <div class="contact-details">
+            <div class="contact-item">
+                <div class="contact-icon">📧</div>
+                <div class="contact-item-content">
+                    <h3>Email</h3>
+                    <p>info@securemapviewer.com</p>
+                    <p>support@securemapviewer.com</p>
+                </div>
+            </div>
+
+            <div class="contact-item">
+                <div class="contact-icon">📞</div>
+                <div class="contact-item-content">
+                    <h3>Phone</h3>
+                    <p>+1 (555) 123-4567</p>
+                    <p>Mon - Fri, 9:00 AM - 6:00 PM</p>
+                </div>
+            </div>
+
+            <div class="contact-item">
+                <div class="contact-icon">📍</div>
+                <div class="contact-item-content">
+                    <h3>Address</h3>
+                    <p>123 Map Street</p>
+                    <p>Geographic City, ST 12345</p>
+                </div>
+            </div>
+
+            <div class="contact-item">
+                <div class="contact-icon">⏰</div>
+                <div class="contact-item-content">
+                    <h3>Business Hours</h3>
+                    <p>Monday - Friday: 9:00 AM - 6:00 PM</p>
+                    <p>Saturday: 10:00 AM - 4:00 PM</p>
+                    <p>Sunday: Closed</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <h3>📦 Interested in Purchasing Maps?</h3>
+            <p>
+                We offer map purchase and licensing options for organizations and individuals.
+                Contact us for pricing information and bulk purchase options.
+            </p>
+        </div>
+
+        <div class="info-box" style="margin-top: 1rem;">
+            <h3>💡 Need Specific Maps?</h3>
+            <p>
+                If you're looking for maps not currently available, visit our
+                <a href="{% url 'forum' %}" style="color: #3498db;">forum page</a> to submit a request.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
