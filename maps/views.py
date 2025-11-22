@@ -6,7 +6,8 @@ from django.views.decorators.cache import never_cache
 from django.db.models import Q
 from .models import Department, Category, Map, ForumSubmission, ContactMessage
 import mimetypes
-
+from django.core.mail import send_mail
+from django.conf import settings
 
 def home(request):
     departments = Department.objects.filter(is_active=True)
