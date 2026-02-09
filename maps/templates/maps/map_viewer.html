@@ -135,10 +135,16 @@
     <!-- NEW PDF VIEWER -->
     {% if map.file_format == 'pdf' %}
         <div class="pdf-controls">
-            <button id="prev-page" onclick="previousPage()">⬅ Previous</button>
+            <button onclick="previousPage()">⬅ Previous</button>
+
+            <button onclick="zoomOut()">➖ Zoom Out</button>
+            <span>Zoom: <span id="zoom-level">100%</span></span>
+            <button onclick="zoomIn()">➕ Zoom In</button>
+
+            <button onclick="nextPage()">Next ➡</button>
             <span>Page <span id="page-num">1</span> / <span id="page-count">0</span></span>
-            <button id="next-page" onclick="nextPage()">Next ➡</button>
         </div>
+
         <div class="pdf-viewer">
             <canvas id="pdf-canvas"></canvas>
         </div>
@@ -168,14 +174,72 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
     "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
 const pdfUrl = "{% url 'serve_map_file' map.id %}";
+
 let pdfDoc = null;
 let pageNum = 1;
-// --- PDF Click & Drag Panning ---
+let scale = 1.3;         // default zoom
 const canvas = document.getElementById("pdf-canvas");
 const ctx = canvas.getContext("2d");
-const container = document.querySelector(".pdf-viewer");   // <-- REQUIRED FIX
+const container = document.querySelector(".pdf-viewer");
 
-// --- PDF Click & Drag Panning ---
+// Load PDF
+pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
+    pdfDoc = pdf;
+    document.getElementById("page-count").innerText = pdf.numPages;
+    renderPage(pageNum);
+});
+
+/* ------------------ PDF RENDERING ------------------ */
+function renderPage(num) {
+    pdfDoc.getPage(num).then(page => {
+        const viewport = page.getViewport({ scale: scale });
+
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+
+        page.render({ canvasContext: ctx, viewport });
+        document.getElementById("page-num").innerText = num;
+        document.getElementById("zoom-level").innerText = Math.round(scale * 100) + "%";
+    });
+}
+
+/* ------------------ PAGE CONTROLS ------------------ */
+function nextPage() {
+    if (pageNum >= pdfDoc.numPages) return;
+    pageNum++;
+    renderPage(pageNum);
+}
+function previousPage() {
+    if (pageNum <= 1) return;
+    pageNum--;
+    renderPage(pageNum);
+}
+
+/* ------------------ ZOOM CONTROLS ------------------ */
+function zoomIn() {
+    scale += 0.2;
+    renderPage(pageNum);
+}
+
+function zoomOut() {
+    if (scale <= 0.4) return;
+    scale -= 0.2;
+    renderPage(pageNum);
+}
+
+/* CTRL + Mouse Wheel Zoom */
+container.addEventListener("wheel", function(event) {
+    if (!event.ctrlKey) return;
+    event.preventDefault();
+
+    if (event.deltaY < 0) {
+        zoomIn();
+    } else {
+        zoomOut();
+    }
+}, { passive: false });
+
+/* ------------------ DRAG TO PAN ------------------ */
 let isDragging = false;
 let startX, startY;
 let scrollLeft, scrollTop;
@@ -188,62 +252,24 @@ container.addEventListener("mousedown", (e) => {
     scrollLeft = container.scrollLeft;
     scrollTop = container.scrollTop;
 });
-
 container.addEventListener("mouseleave", () => {
     isDragging = false;
     container.style.cursor = "grab";
 });
-
 container.addEventListener("mouseup", () => {
     isDragging = false;
     container.style.cursor = "grab";
 });
-
 container.addEventListener("mousemove", (e) => {
     if (!isDragging) return;
     e.preventDefault();
-
     const x = e.pageX - container.offsetLeft;
     const y = e.pageY - container.offsetTop;
-
-    const walkX = x - startX;
-    const walkY = y - startY;
-
-    container.scrollLeft = scrollLeft - walkX;
-    container.scrollTop = scrollTop - walkY;
+    container.scrollLeft = scrollLeft - (x - startX);
+    container.scrollTop = scrollTop - (y - startY);
 });
 
-// Load PDF
-pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
-    pdfDoc = pdf;
-    document.getElementById("page-count").innerText = pdf.numPages;
-    renderPage(pageNum);
-});
-
-function renderPage(num) {
-    pdfDoc.getPage(num).then(page => {
-        const viewport = page.getViewport({ scale: 1.3 });
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-
-        page.render({ canvasContext: ctx, viewport });
-        document.getElementById("page-num").innerText = num;
-    });
-}
-
-function nextPage() {
-    if (pageNum >= pdfDoc.numPages) return;
-    pageNum++;
-    renderPage(pageNum);
-}
-
-function previousPage() {
-    if (pageNum <= 1) return;
-    pageNum--;
-    renderPage(pageNum);
-}
-
-// Disable right click, print, save
+/* ------------------ SECURITY ------------------ */
 document.addEventListener("contextmenu", e => e.preventDefault());
 document.addEventListener("keydown", e => {
     if ((e.ctrlKey && ["s", "p", "u"].includes(e.key)) || e.key === "F12") {
@@ -251,6 +277,7 @@ document.addEventListener("keydown", e => {
     }
 });
 </script>
+
 {% endif %}
 
 {% if map.file_format == 'kml' or map.file_format == 'kmz' %}
